@@ -1,0 +1,164 @@
+Load the dataset
+
+```{r}
+load("~/projects/r_for_bio_data_science/data/gravier.RData")
+```
+
+This will load our data science toolbox, including `ggplot`.
+
+```{r}
+library("tidyverse")
+```
+
+# Create Data
+
+```{r}
+set.seed(676571)
+cancer_data=mutate(as_tibble(pluck(gravier,"x")),y=pluck(gravier,"y"),pt_id=1:length(pluck(gravier, "y")),age=round(rnorm(length(pluck(gravier,"y")),mean=55,sd=10),1))
+
+cancer_data=rename(cancer_data,event_label=y)
+cancer_data$age_group=cut(cancer_data$age,breaks=seq(10,100,by=10))
+cancer_data=relocate(cancer_data,c(pt_id,age,age_group,pt_id,event_label))
+```
+
+View the tibble
+
+```{r}
+cancer_data
+```
+
+# ggplot
+
+Plot 20 \[x,y\] observations where x and y are sampled from a normal distribution with mean = 0 and std = 1
+
+```{r}
+ggplot(data = tibble(x = rnorm(20), y = rnorm(20)),mapping = aes(x = x,y = y)) +
+  geom_point()
+```
+
+# Exercises
+
+-   **T1: scatterplot of one variable against another**
+
+    ```{r}
+
+    ggplot(data = cancer_data,mapping = aes(x = g7F07,y = g1A01)) +
+      geom_point()
+    ```
+
+-   **T2: linegraph of one variable against another**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g7F07,y = g1A01)) + geom_line()
+    ```
+
+-   **T3: boxplot of one variable**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g7F07)) + geom_boxplot()
+    ```
+
+-   **T4: histogram of one variable**
+
+    ```{r}
+
+    ggplot(data = cancer_data,mapping = aes(x = g7F07)) + geom_histogram()
+    ```
+
+-   **T5: densitogram of one variable**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g7F07)) + geom_density()
+    ```
+
+-   **T6: Pick your favourite gene and create a boxplot of expression levels stratified on the variable `event_label`**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = event_label, y = g7F07)) + geom_boxplot()
+    ```
+
+-   **T7: Like T6, but with densitograms** GROUP ASSIGNMENT
+
+    ```{r}
+    ggplot(data = cancer_data,aes(x = g7F07, fill = event_label)) + geom_density(alpha = 0.5)
+    ```
+
+-   **T8: Pick your favourite gene and create a boxplot of expression levels stratified on the variable `age_group`**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age_group, y = g7F07)) + geom_boxplot()
+    ```
+
+    Then, add stratification on `event_label`
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age_group, y = g7F07, fill = event_label)) + geom_boxplot()
+    ```
+
+-   Then, add transparency to the boxes
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age_group, y = g7F07, fill = event_label)) + geom_boxplot( alpha = 0.8)
+    ```
+
+    Then, add some labels
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age_group, y = g7F07, fill = event_label)) + geom_boxplot( alpha = 0.8) + labs(x = "Age Group", y = "Expression Levels (g7F07)", fill = "Event Label")
+    ```
+
+-   **T9: Pick your favourite gene and create a scatter-plot of expression levels versus `age`**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age, y = g7F07)) + geom_point()
+    ```
+
+    Then, add stratification on `event_label`
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = age, y = g7F07, color = event_label)) + geom_point() + labs(x = "Age", y = "Expression Levels (g7F07)")
+    ```
+
+-   **T10: Pick your favourite two genes and create a scatter-plot of their expression levels**
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g2E09, y = g7F07)) + geom_point()
+    ```
+
+    Then, add stratification on `event_label`
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g2E09, y = g7F07, color = event_label)) + geom_point()
+    ```
+
+    Then, add a smoothing line
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g2E09, y = g7F07, color = event_label)) + geom_point() + geom_smooth(method = "lm")
+    ```
+
+    Then, show split into seperate panes based on the variable `age_group`
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g2E09, y = g7F07, color = event_label)) + geom_point() + geom_smooth(method = "lm") + facet_wrap(~ age_group) 
+    ```
+
+    Then, add some labels
+
+    ```{r}
+    ggplot(data = cancer_data,mapping = aes(x = g2E09, y = g7F07, color = event_label)) + geom_point() + geom_smooth(method = "lm") + facet_wrap(~ age_group) + labs(x = "Expression Levels (g2E09)", y = "Expression Levels (g7F07)")
+    ```
+
+-   **T11: Recreate the following plot**
+
+    ```{r}
+    ggplot(data = cancer_data, mapping = aes(x = g1CNS507, y = event_label, fill = event_label)) + geom_boxplot(alpha = 0.5) + labs(x = "Expression level of g1CNS507 (log2 transformed)",  y = "Event after Diagnosis") + theme(legend.position = "none") + ggtitle("A prognostic DNA signature for T1T2 node-negative breast cancer patients") + labs(subtitle = "Labelling: good = no event, poor = early metastasis")
+    ```
+
+-   **T12: Recreate the following plot**
+
+    ```{r}
+    ggplot(data = cancer_data, mapping = aes(x = age, y = g1int239, fill = event_label)) + geom_point(shape = 21) + labs(y = "Expression level of g1int239 (log2 transformed)",  x = "Age") + theme(legend.position = "bottom") + ggtitle("A prognostic DNA signature for T1T2 node-negative breast cancer patients") + labs(subtitle = "Labelling: good = no event, poor = early metastasis") + geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(color = event_label))
+    ```
+
+-   **T13: If you arrive here and there is still time left for the exercises, you are probably already familiar with `ggplot` - Use what time is left to challenge yourself to further explore the `cancer_data` and create some nice data visualisations - Show me what you come up with!**
